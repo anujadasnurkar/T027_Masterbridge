@@ -1,66 +1,259 @@
-import 'dart:io';
+//import 'dart:io';
+//
+//import 'package:flutter/cupertino.dart';
+//import 'package:flutter/material.dart';
+//import 'package:image_picker/image_picker.dart';
+//import 'package:video_player/video_player.dart';
+//import 'package:firebase_storage/firebase_storage.dart';
+//
+//class UploadVideos extends StatefulWidget {
+//  @override
+//  _UploadVideosState createState() => _UploadVideosState();
+//}
+//
+//class _UploadVideosState extends State<UploadVideos> {
+//  VideoPlayerController playerController;
+//  File video;
+//  final picker = ImagePicker();
+//  Future getVideo() async {
+////    var tempVideo = await picker.getVideo(source: ImageSource.gallery);
+//    PickedFile tempVideo = await picker.getVideo(source: ImageSource.gallery);
+//    setState(() {
+//      if (tempVideo != null) {
+//        video = File(tempVideo.path);
+//      } else {
+//        print('No video selected.');
+//      }
+//    });
+//  }
+//  @override
+//  Widget build(BuildContext context) {
+//    return Scaffold(
+//      appBar: AppBar(
+//        title: Text('Upload Videos'),
+//      ),
+//      body: Center(
+//        child: video == null ? Text("Select a video") : enableUpload(),
+//      ),
+//      floatingActionButton: FloatingActionButton(
+//        onPressed: getVideo,
+//        tooltip: 'Add Video',
+//        child: Icon(Icons.add),
+//      ),
+//    );
+//  }
+//}
+//
+//
+//Widget enableUpload() {
+//  return Container(
+//    child: Column(
+////      children: [
+////        Image.file(sampleImage, height: 300, width: 300,),
+////        RaisedButton(
+////          elevation: 7,
+////          child: Text('Upload'),
+////          textColor: Colors.white,
+////          color: Colors.black,
+////          onPressed: () async {
+////            final StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('image.jpg');
+////            final StorageUploadTask task = firebaseStorageRef.putFile(sampleImage);
+////          },
+////        ),
+////      ],
+//    ),
+//  );
+//}
 
-import 'package:flutter/cupertino.dart';
+
+
+import 'package:chewie/chewie.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-
-class UploadVideos extends StatefulWidget {
+class MyVideo extends StatefulWidget {
   @override
-  _UploadVideosState createState() => _UploadVideosState();
+  _MyVideoState createState() => _MyVideoState();
 }
 
-class _UploadVideosState extends State<UploadVideos> {
-  VideoPlayerController playerController;
-  File video;
-  final picker = ImagePicker();
-  Future getVideo() async {
-//    var tempVideo = await picker.getVideo(source: ImageSource.gallery);
-    PickedFile tempVideo = await picker.getVideo(source: ImageSource.gallery);
-    setState(() {
-      if (tempVideo != null) {
-        video = File(tempVideo.path);
-      } else {
-        print('No video selected.');
-      }
-    });
-  }
+class _MyVideoState extends State<MyVideo> {
+
+  final fb = FirebaseDatabase.instance.reference().child("VideoLink");
+  List<String>  itemList=new List();
+  FirebaseAuth mAuth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Upload Videos'),
-      ),
-      body: Center(
-        child: video == null ? Text("Select a video") : enableUpload(),
+      body: Container(
+        child: SingleChildScrollView(
+          physics: new BouncingScrollPhysics(),
+          scrollDirection: Axis.vertical,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListView.separated(
+                shrinkWrap: true,
+                cacheExtent: 1000,
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                key: PageStorageKey(widget.key),
+                addAutomaticKeepAlives: true,
+                itemCount: itemList.isEmpty ? 0 : itemList.length,
+                itemBuilder: (BuildContext context, int index) =>
+                    Container(
+                      width: double.infinity,
+                      height: 250,
+                      alignment: Alignment.center,
+                      child: Container(
+                          key: new PageStorageKey(
+                            "keydata$index",
+                          ),
+                          child: VideoWidget(
+                              play: true,
+                              url: itemList[index]
+                          )
+                      ),
+                    ),
+                separatorBuilder: (context, index) {
+                  return Divider();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: getVideo,
-        tooltip: 'Add Video',
-        child: Icon(Icons.add),
+        onPressed: (){
+          uploadToStorage();
+        },
+        backgroundColor: Colors.transparent,
+        child: Icon(
+          Icons.add,
+          size: 40,
+          color: Colors.white,
+        ),
       ),
     );
   }
+  Future uploadToStorage() async {
+    var uuid =Uuid();
+    dynamic id=uuid.v1();
+    try {
+      mAuth.signInAnonymously().then((value)  async {
+        final file =  await ImagePicker.pickVideo(source: ImageSource.gallery);
+        StorageReference ref = FirebaseStorage.instance.ref().child("video").child(id);
+        StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
+        var storageTaskSnapshot = await uploadTask.onComplete;
+        var downloadUrl = await storageTaskSnapshot.ref.getDownloadURL();
+        final String url = downloadUrl.toString();
+        fb.child(id).set({
+          "id": id,
+          "link": url,
+        }).then((value) {
+          print("Done");
+        });
+      });
+    } catch (error) {
+      print(error);
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    fb.once().then((DataSnapshot snap){
+      print(snap);
+      var data=snap.value;
+      print(data);
+      itemList.clear();
+      data.forEach((key,value) {
+        itemList.add(value['link']);
+      });
+      setState(() {
+      });
+    });
+  }
+}
+
+class VideoWidget extends StatefulWidget {
+
+  final bool play;
+  final String url;
+
+  const VideoWidget({Key key, @required this.url, @required this.play})
+      : super(key: key);
+
+  @override
+  _VideoWidgetState createState() => _VideoWidgetState();
 }
 
 
-Widget enableUpload() {
-  return Container(
-    child: Column(
-//      children: [
-//        Image.file(sampleImage, height: 300, width: 300,),
-//        RaisedButton(
-//          elevation: 7,
-//          child: Text('Upload'),
-//          textColor: Colors.white,
-//          color: Colors.black,
-//          onPressed: () async {
-//            final StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('image.jpg');
-//            final StorageUploadTask task = firebaseStorageRef.putFile(sampleImage);
-//          },
-//        ),
-//      ],
-    ),
-  );
+class _VideoWidgetState extends State<VideoWidget> {
+  VideoPlayerController videoPlayerController ;
+  Future<void> _initializeVideoPlayerFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    videoPlayerController = new VideoPlayerController.network(widget.url);
+    _initializeVideoPlayerFuture = videoPlayerController.initialize().then((_) {
+      setState(() {});
+    });
+  }
+  @override
+  void dispose() {
+    videoPlayerController.dispose();
+    //    widget.videoPlayerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _initializeVideoPlayerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return new Container(
+            child: Card(
+              key: new PageStorageKey(widget.url),
+              elevation: 5.0,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Chewie(
+                      key: new PageStorageKey(widget.url),
+                      controller: ChewieController(
+                        videoPlayerController: videoPlayerController,
+                        aspectRatio: 3 / 2,
+                        autoInitialize: true,
+                        looping: false,
+                        autoPlay: false,
+                        errorBuilder: (context, errorMessage) {
+                          return Center(
+                            child: Text(
+                              errorMessage,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        else {
+          return Center(
+            child: CircularProgressIndicator(),);
+        }
+      },
+    );
+  }
 }
