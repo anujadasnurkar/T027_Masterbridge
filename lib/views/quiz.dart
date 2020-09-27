@@ -40,17 +40,15 @@ class _QuizPlayState extends State<QuizPlay> {
       print("init don $total ${widget.quizId} ");
     });
 
-    if(infoStream == null){
-      infoStream = Stream<List<int>>.periodic(
-          Duration(milliseconds: 100), (x){
+    if (infoStream == null) {
+      infoStream = Stream<List<int>>.periodic(Duration(milliseconds: 100), (x) {
         print("this is x $x");
-        return [_correct, _incorrect] ;
+        return [_correct, _incorrect];
       });
     }
 
     super.initState();
   }
-
 
   QuestionModel getQuestionModelFromDatasnapshot(
       DocumentSnapshot questionSnapshot) {
@@ -96,37 +94,39 @@ class _QuizPlayState extends State<QuizPlay> {
       ),
       body: isLoading
           ? Container(
-        child: Center(child: CircularProgressIndicator()),
-      )
+              child: Center(child: CircularProgressIndicator()),
+            )
           : SingleChildScrollView(
-        child: Container(
-          child: Column(
-            children: [
-              InfoHeader(
-                length: questionSnaphot.documents.length,
+              child: Container(
+                child: Column(
+                  children: [
+                    InfoHeader(
+                      length: questionSnaphot.documents.length,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    questionSnaphot.documents == null
+                        ? Container(
+                            child: Center(
+                              child: Text("No Data"),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: questionSnaphot.documents.length,
+                            shrinkWrap: true,
+                            physics: ClampingScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              return QuizPlayTile(
+                                questionModel: getQuestionModelFromDatasnapshot(
+                                    questionSnaphot.documents[index]),
+                                index: index,
+                              );
+                            })
+                  ],
+                ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              questionSnaphot.documents == null
-                  ? Container(
-                child: Center(child: Text("No Data"),),
-              )
-                  : ListView.builder(
-                  itemCount: questionSnaphot.documents.length,
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return QuizPlayTile(
-                      questionModel: getQuestionModelFromDatasnapshot(
-                          questionSnaphot.documents[index]),
-                      index: index,
-                    );
-                  })
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }
@@ -145,38 +145,38 @@ class _InfoHeaderState extends State<InfoHeader> {
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: infoStream,
-        builder: (context, snapshot){
-          return snapshot.hasData ? Container(
-            height: 40,
-            margin: EdgeInsets.only(left: 14),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              children: <Widget>[
-                NoOfQuestionTile(
-                  text: "Total",
-                  number: widget.length,
-                ),
-                NoOfQuestionTile(
-                  text: "Correct",
-                  number: _correct,
-                ),
-                NoOfQuestionTile(
-                  text: "Incorrect",
-                  number: _incorrect,
-                ),
-                NoOfQuestionTile(
-                  text: "NotAttempted",
-                  number: _notAttempted,
-                ),
-              ],
-            ),
-          ) : Container();
-        }
-    );
+        builder: (context, snapshot) {
+          return snapshot.hasData
+              ? Container(
+                  height: 40,
+                  margin: EdgeInsets.only(left: 14),
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      NoOfQuestionTile(
+                        text: "Total",
+                        number: widget.length,
+                      ),
+                      NoOfQuestionTile(
+                        text: "Correct",
+                        number: _correct,
+                      ),
+                      NoOfQuestionTile(
+                        text: "Incorrect",
+                        number: _incorrect,
+                      ),
+                      NoOfQuestionTile(
+                        text: "NotAttempted",
+                        number: _notAttempted,
+                      ),
+                    ],
+                  ),
+                )
+              : Container();
+        });
   }
 }
-
 
 class QuizPlayTile extends StatefulWidget {
   final QuestionModel questionModel;
@@ -198,13 +198,11 @@ class _QuizPlayTileState extends State<QuizPlayTile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.symmetric(
-                horizontal: 20
-            ),
+            margin: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               "Q${widget.index + 1} ${widget.questionModel.question}",
               style:
-              TextStyle(fontSize: 18, color: Colors.black.withOpacity(0.8)),
+                  TextStyle(fontSize: 18, color: Colors.black.withOpacity(0.8)),
             ),
           ),
           SizedBox(

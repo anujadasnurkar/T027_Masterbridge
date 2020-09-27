@@ -40,7 +40,7 @@ class DatabaseService {
     return await Firestore.instance.collection("Quiz").snapshots();
   }
 
-  getQuestionData(String quizId) async{
+  getQuestionData(String quizId) async {
     return await Firestore.instance
         .collection("Quiz")
         .document(quizId)

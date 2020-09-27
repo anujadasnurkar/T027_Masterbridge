@@ -73,15 +73,15 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
+
 class MyVideo extends StatefulWidget {
   @override
   _MyVideoState createState() => _MyVideoState();
 }
 
 class _MyVideoState extends State<MyVideo> {
-
   final fb = FirebaseDatabase.instance.reference().child("VideoLink");
-  List<String>  itemList=new List();
+  List<String> itemList = new List();
   FirebaseAuth mAuth = FirebaseAuth.instance;
 
   @override
@@ -102,21 +102,16 @@ class _MyVideoState extends State<MyVideo> {
                 key: PageStorageKey(widget.key),
                 addAutomaticKeepAlives: true,
                 itemCount: itemList.isEmpty ? 0 : itemList.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    Container(
-                      width: double.infinity,
-                      height: 250,
-                      alignment: Alignment.center,
-                      child: Container(
-                          key: new PageStorageKey(
-                            "keydata$index",
-                          ),
-                          child: VideoWidget(
-                              play: true,
-                              url: itemList[index]
-                          )
+                itemBuilder: (BuildContext context, int index) => Container(
+                  width: double.infinity,
+                  height: 250,
+                  alignment: Alignment.center,
+                  child: Container(
+                      key: new PageStorageKey(
+                        "keydata$index",
                       ),
-                    ),
+                      child: VideoWidget(play: true, url: itemList[index])),
+                ),
                 separatorBuilder: (context, index) {
                   return Divider();
                 },
@@ -126,7 +121,7 @@ class _MyVideoState extends State<MyVideo> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           uploadToStorage();
         },
         backgroundColor: Colors.transparent,
@@ -138,14 +133,17 @@ class _MyVideoState extends State<MyVideo> {
       ),
     );
   }
+
   Future uploadToStorage() async {
-    var uuid =Uuid();
-    dynamic id=uuid.v1();
+    var uuid = Uuid();
+    dynamic id = uuid.v1();
     try {
-      mAuth.signInAnonymously().then((value)  async {
-        final file =  await ImagePicker.pickVideo(source: ImageSource.gallery);
-        StorageReference ref = FirebaseStorage.instance.ref().child("video").child(id);
-        StorageUploadTask uploadTask = ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
+      mAuth.signInAnonymously().then((value) async {
+        final file = await ImagePicker.pickVideo(source: ImageSource.gallery);
+        StorageReference ref =
+            FirebaseStorage.instance.ref().child("video").child(id);
+        StorageUploadTask uploadTask =
+            ref.putFile(file, StorageMetadata(contentType: 'video/mp4'));
         var storageTaskSnapshot = await uploadTask.onComplete;
         var downloadUrl = await storageTaskSnapshot.ref.getDownloadURL();
         final String url = downloadUrl.toString();
@@ -160,25 +158,24 @@ class _MyVideoState extends State<MyVideo> {
       print(error);
     }
   }
+
   @override
   void initState() {
     super.initState();
-    fb.once().then((DataSnapshot snap){
+    fb.once().then((DataSnapshot snap) {
       print(snap);
-      var data=snap.value;
+      var data = snap.value;
       print(data);
       itemList.clear();
-      data.forEach((key,value) {
+      data.forEach((key, value) {
         itemList.add(value['link']);
       });
-      setState(() {
-      });
+      setState(() {});
     });
   }
 }
 
 class VideoWidget extends StatefulWidget {
-
   final bool play;
   final String url;
 
@@ -189,9 +186,8 @@ class VideoWidget extends StatefulWidget {
   _VideoWidgetState createState() => _VideoWidgetState();
 }
 
-
 class _VideoWidgetState extends State<VideoWidget> {
-  VideoPlayerController videoPlayerController ;
+  VideoPlayerController videoPlayerController;
   Future<void> _initializeVideoPlayerFuture;
 
   @override
@@ -202,6 +198,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       setState(() {});
     });
   }
+
   @override
   void dispose() {
     videoPlayerController.dispose();
@@ -246,10 +243,10 @@ class _VideoWidgetState extends State<VideoWidget> {
               ),
             ),
           );
-        }
-        else {
+        } else {
           return Center(
-            child: CircularProgressIndicator(),);
+            child: CircularProgressIndicator(),
+          );
         }
       },
     );

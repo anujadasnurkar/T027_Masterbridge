@@ -25,17 +25,16 @@ class _OptionTileState extends State<OptionTile> {
                 border: Border.all(
                     color: widget.optionSelected == widget.description
                         ? widget.description == widget.correctAnswer
-                        ? Colors.green.withOpacity(0.7)
-                        : Colors.red.withOpacity(0.7)
+                            ? Colors.green.withOpacity(0.7)
+                            : Colors.red.withOpacity(0.7)
                         : Colors.grey,
                     width: 1.5),
                 color: widget.optionSelected == widget.description
                     ? widget.description == widget.correctAnswer
-                    ? Colors.green.withOpacity(0.7)
-                    : Colors.red.withOpacity(0.7)
+                        ? Colors.green.withOpacity(0.7)
+                        : Colors.red.withOpacity(0.7)
                     : Colors.white,
-                borderRadius: BorderRadius.circular(24)
-            ),
+                borderRadius: BorderRadius.circular(24)),
             child: Text(
               widget.option,
               style: TextStyle(
@@ -48,15 +47,15 @@ class _OptionTileState extends State<OptionTile> {
           SizedBox(
             width: 8,
           ),
-          Text(widget.description, style: TextStyle(
-              fontSize: 17, color: Colors.black54
-          ),)
+          Text(
+            widget.description,
+            style: TextStyle(fontSize: 17, color: Colors.black54),
+          )
         ],
       ),
     );
   }
 }
-
 
 class NoOfQuestionTile extends StatefulWidget {
   final String text;
@@ -76,14 +75,12 @@ class _NoOfQuestionTileState extends State<NoOfQuestionTile> {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(14),
-                    bottomLeft: Radius.circular(14)
-                ),
-                color: Colors.blue
-            ),
+                    bottomLeft: Radius.circular(14)),
+                color: Colors.blue),
             child: Text(
               "${widget.number}",
               style: TextStyle(color: Colors.white),
@@ -96,8 +93,7 @@ class _NoOfQuestionTileState extends State<NoOfQuestionTile> {
                   topRight: Radius.circular(14),
                   bottomRight: Radius.circular(14),
                 ),
-                color: Colors.black54
-            ),
+                color: Colors.black54),
             child: Text(
               widget.text,
               style: TextStyle(color: Colors.white),

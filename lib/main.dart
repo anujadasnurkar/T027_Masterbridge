@@ -20,6 +20,26 @@
 //}
 //
 
+// import 'package:flutter/material.dart';
+// import 'package:learningapp/screens/lessonVideos/LessonVideo.dart';
+// import 'package:learningapp/screens/lessonVideos/UploadVideos.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'Flutter Demo',
+//       home: MyVideo(),
+//     );
+//   }
+// }
+
 import 'dart:async';
 import 'dart:io';
 
@@ -54,14 +74,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void initState() {
-    // Create and store the VideoPlayerController. The VideoPlayerController
-    // offers several different constructors to play videos from assets, files,
+// Create and store the VideoPlayerController. The VideoPlayerController
+// offers several different constructors to play videos from assets, files,
     super.initState();
   }
 
   @override
   void dispose() {
-    // Ensure disposing of the VideoPlayerController to free up resources.
+// Ensure disposing of the VideoPlayerController to free up resources.
     _controller.dispose();
 
     super.dispose();
@@ -73,8 +93,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       appBar: AppBar(
         title: Text('Butterfly Video'),
       ),
-      // Use a FutureBuilder to display a loading spinner while waiting for the
-      // VideoPlayerController to finish initializing.
+// Use a FutureBuilder to display a loading spinner while waiting for the
+// VideoPlayerController to finish initializing.
       body: Column(
         children: <Widget>[
           Visibility(
@@ -83,16 +103,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               future: _initializeVideoPlayerFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  // If the VideoPlayerController has finished initialization, use
-                  // the data it provides to limit the aspect ratio of the video.
+// If the VideoPlayerController has finished initialization, use
+// the data it provides to limit the aspect ratio of the video.
                   return AspectRatio(
                     aspectRatio: _controller.value.aspectRatio,
-                    // Use the VideoPlayer widget to display the video.
+// Use the VideoPlayer widget to display the video.
                     child: VideoPlayer(_controller),
                   );
                 } else {
-                  // If the VideoPlayerController is still initializing, show a
-                  // loading spinner.
+// If the VideoPlayerController is still initializing, show a
+// loading spinner.
                   return Center(child: CircularProgressIndicator());
                 }
               },
@@ -109,39 +129,39 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       floatingActionButton: _controller == null
           ? null
           : FloatingActionButton(
-        onPressed: () {
-          // Wrap the play or pause in a call to `setState`. This ensures the
-          // correct icon is shown.
-          setState(() {
-            // If the video is playing, pause it.
-            if (_controller.value.isPlaying) {
-              _controller.pause();
-            } else {
-              // If the video is paused, play it.
-              _controller.play();
-            }
-          });
-        },
-        // Display the correct icon depending on the state of the player.
-        child: Icon(
-          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+              onPressed: () {
+// Wrap the play or pause in a call to `setState`. This ensures the
+// correct icon is shown.
+                setState(() {
+// If the video is playing, pause it.
+                  if (_controller.value.isPlaying) {
+                    _controller.pause();
+                  } else {
+// If the video is paused, play it.
+                    _controller.play();
+                  }
+                });
+              },
+// Display the correct icon depending on the state of the player.
+              child: Icon(
+                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              ),
+            ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
   Future getVideo() async {
     Future<File> _videoFile =
-    ImagePicker.pickVideo(source: ImageSource.gallery);
+        ImagePicker.pickVideo(source: ImageSource.gallery);
     _videoFile.then((file) async {
       setState(() {
         videoFile = file;
         _controller = VideoPlayerController.file(videoFile);
 
-        // Initialize the controller and store the Future for later use.
+// Initialize the controller and store the Future for later use.
         _initializeVideoPlayerFuture = _controller.initialize();
 
-        // Use the controller to loop the video.
+// Use the controller to loop the video.
         _controller.setLooping(true);
       });
     });
